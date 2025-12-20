@@ -14,7 +14,7 @@ $classes = mysqli_query($conn, "SELECT * FROM classes ORDER BY class_name, secti
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Attendance - Attendance Management System</title>
+    <title>Attendance Management System</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>

@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Attendance Management System</title>
+    <title>Attendance Management System</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="login-body">
@@ -69,9 +69,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <button type="submit" class="btn btn-primary btn-block">Login</button>
             </form>
             
-            <div class="login-footer">
-                <p>Default credentials: <strong>admin</strong> / <strong>admin123</strong></p>
-            </div>
         </div>
     </div>
 </body>

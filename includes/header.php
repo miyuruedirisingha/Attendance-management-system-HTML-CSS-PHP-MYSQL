@@ -13,7 +13,7 @@
         </ul>
         
         <div class="nav-user">
-            <span>Welcome, <?php echo $_SESSION['full_name']; ?></span>
+          
             <a href="logout.php" class="btn btn-small">Logout</a>
         </div>
     </div>
