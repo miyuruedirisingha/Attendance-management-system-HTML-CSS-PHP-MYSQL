@@ -6,11 +6,23 @@ define('DB_PASS', getenv('DB_PASS') ?: '');
 define('DB_NAME', getenv('DB_NAME') ?: 'attendance_system');
 
 // Create database connection
-$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+$max_retries = 5;
+$retry_count = 0;
+$conn = false;
+
+while (!$conn && $retry_count < $max_retries) {
+    $conn = @mysqli_connect(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+    if (!$conn) {
+        $retry_count++;
+        if ($retry_count < $max_retries) {
+            sleep(2); // Wait 2 seconds before retry
+        }
+    }
+}
 
 // Check connection
 if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error());
+    die("Connection failed after {$max_retries} attempts: " . mysqli_connect_error() . "<br>Host: " . DB_HOST);
 }
 
 // Set charset to utf8
