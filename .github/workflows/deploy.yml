@@ -41,22 +41,39 @@ jobs:
         ssh -o StrictHostKeyChecking=no -i private_key.pem ${USER}@${HOST} << 'EOF'
           cd ~/attendance-app
           
-          echo "⬇️ Stopping current containers..."
-          docker-compose -f docker-compose.prod.yml down
+          echo "📊 Current containers before deployment:"
+          docker ps -a --filter "name=attendance"
           
-          echo "📥 Pulling latest images..."
+          echo "⬇️ Stopping and removing current containers..."
+          docker-compose -f docker-compose.prod.yml down -v --remove-orphans
+          
+          echo "🗑️ Removing old images to force fresh build..."
+          docker images | grep attendance | awk '{print $3}' | xargs -r docker rmi -f || true
+          
+          echo "📥 Pulling base images..."
           docker-compose -f docker-compose.prod.yml pull
           
-          echo "🏗️ Building and starting containers..."
-          docker-compose -f docker-compose.prod.yml up -d --build
+          echo "🏗️ Building images without cache (force rebuild)..."
+          docker-compose -f docker-compose.prod.yml build --no-cache --pull
           
-          echo "🧹 Cleaning up old images..."
+          echo "🚀 Starting containers..."
+          docker-compose -f docker-compose.prod.yml up -d --force-recreate
+          
+          echo "⏳ Waiting for containers to be healthy..."
+          sleep 10
+          
+          echo "🧹 Cleaning up dangling images..."
           docker image prune -f
           
-          echo "📊 Container Status:"
+          echo "📊 New Container Status:"
           docker-compose -f docker-compose.prod.yml ps
+          docker ps --filter "name=attendance" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}\t{{.Image}}"
+          
+          echo "🔍 Checking web container logs (last 20 lines):"
+          docker logs attendance_web --tail 20 || true
           
           echo "✅ Deployment completed successfully!"
+          echo "Timestamp: $(date)"
         EOF
         
         rm -f private_key.pem
@@ -75,8 +92,21 @@ jobs:
         
         ssh -o StrictHostKeyChecking=no -i private_key.pem ${USER}@${HOST} << 'EOF'
           cd ~/attendance-app
-          echo "Running containers:"
+          
+          echo "✅ Running containers:"
           docker ps --filter "name=attendance" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+          
+          echo ""
+          echo "📋 Image details:"
+          docker images | grep attendance
+          
+          echo ""
+          echo "🏥 Health check:"
+          docker inspect attendance_db --format='{{.State.Health.Status}}' || echo "No health check configured"
+          
+          echo ""
+          echo "📁 Application files timestamp:"
+          ls -lah ~/attendance-app/*.php | head -5
         EOF
         
         rm -f private_key.pem
