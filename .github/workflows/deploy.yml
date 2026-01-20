@@ -14,6 +14,14 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
+      
+    - name: Setup deployment environment
+      run: |
+        echo "🚀 Starting deployment process..."
+        echo "Repository: ${{ github.repository }}"
+        echo "Branch: ${{ github.ref_name }}"
+        echo "Commit: ${{ github.sha }}"
+        echo "Triggered by: ${{ github.actor }}"
 
     - name: Deploy to EC2
       env:
@@ -21,25 +29,69 @@ jobs:
         HOST: ${{ secrets.EC2_HOST }}
         USER: ${{ secrets.EC2_USER }}
       run: |
+        echo "🔑 Setting up SSH key..."
         echo "$PRIVATE_KEY" > private_key.pem
         chmod 600 private_key.pem
         
-        # Copy files to EC2
+        echo "📦 Copying files to EC2..."
         scp -o StrictHostKeyChecking=no -i private_key.pem -r ./* ${USER}@${HOST}:~/attendance-app/
+        echo "✅ Files copied successfully"
         
-        # SSH into EC2 and deploy
+        echo "🔧 Deploying application on EC2..."
         ssh -o StrictHostKeyChecking=no -i private_key.pem ${USER}@${HOST} << 'EOF'
           cd ~/attendance-app
           
-          # Pull latest images and restart containers
+          echo "⬇️ Stopping current containers..."
           docker-compose -f docker-compose.prod.yml down
+          
+          echo "📥 Pulling latest images..."
           docker-compose -f docker-compose.prod.yml pull
+          
+          echo "🏗️ Building and starting containers..."
           docker-compose -f docker-compose.prod.yml up -d --build
           
-          # Clean up old images
+          echo "🧹 Cleaning up old images..."
           docker image prune -f
           
-          echo "Deployment completed successfully!"
+          echo "📊 Container Status:"
+          docker-compose -f docker-compose.prod.yml ps
+          
+          echo "✅ Deployment completed successfully!"
         EOF
         
         rm -f private_key.pem
+        echo "🎉 Deployment process finished!"
+    
+    - name: Verify deployment
+      if: success()
+      env:
+        PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+        HOST: ${{ secrets.EC2_HOST }}
+        USER: ${{ secrets.EC2_USER }}
+      run: |
+        echo "🔍 Verifying deployment..."
+        echo "$PRIVATE_KEY" > private_key.pem
+        chmod 600 private_key.pem
+        
+        ssh -o StrictHostKeyChecking=no -i private_key.pem ${USER}@${HOST} << 'EOF'
+          cd ~/attendance-app
+          echo "Running containers:"
+          docker ps --filter "name=attendance" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+        EOF
+        
+        rm -f private_key.pem
+        echo "✅ Verification complete!"
+    
+    - name: Deployment Summary
+      if: always()
+      run: |
+        echo "================================================"
+        echo "📋 DEPLOYMENT SUMMARY"
+        echo "================================================"
+        echo "Status: ${{ job.status }}"
+        echo "Repository: ${{ github.repository }}"
+        echo "Branch: ${{ github.ref_name }}"
+        echo "Commit: ${{ github.sha }}"
+        echo "Actor: ${{ github.actor }}"
+        echo "Time: $(date)"
+        echo "================================================"

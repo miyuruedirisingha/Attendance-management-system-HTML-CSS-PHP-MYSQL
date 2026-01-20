@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile
     container_name: attendance_web
     ports:
-      - "80:80"
+      - "8000:80"
     volumes:
       - .:/var/www/html
     environment:
@@ -17,7 +17,8 @@ services:
       - DB_PASS=rootpassword
       - DB_NAME=attendance_system
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - attendance_network
     restart: unless-stopped
@@ -27,7 +28,7 @@ services:
     image: mysql:8.0
     container_name: attendance_db
     ports:
-      - "3306:3306"
+      - "3307:3306"
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: attendance_system
@@ -39,6 +40,10 @@ services:
     networks:
       - attendance_network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
 
   # PhpMyAdmin (Optional - for database management)
   phpmyadmin:
@@ -56,10 +61,10 @@ services:
       - attendance_network
     restart: unless-stopped
 
-networks:
-  attendance_network:
-    driver: bridge
-
 volumes:
   db_data:
     driver: local
+
+networks:
+  attendance_network:
+    driver: bridge
