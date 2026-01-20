@@ -4,11 +4,10 @@
     padding: 0;
     box-sizing: border-box;
 }
-
-body {
+ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #000000;
-    color: #e0e0e0;
+    background: #ffffff;
+    color: #333333;
     line-height: 1.6;
 }
 
@@ -18,7 +17,7 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: #000000;
+    background: #ffffff;
 }
 
 .login-container {
