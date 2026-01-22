@@ -1,0 +1,51 @@
+# Environment variables - NEVER commit these!
+.env
+.env.local
+.env.production
+
+# SSH Keys
+*.pem
+*.key
+id_rsa
+id_rsa.pub
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+
+# Database backups
+*.sql
+!database.sql
+backup_*.sql
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# PHP
+vendor/
+composer.lock
+
+# OS files
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Sensitive files
+private/
+secrets/
+*.secret

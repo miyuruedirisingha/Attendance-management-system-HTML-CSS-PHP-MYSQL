@@ -8,13 +8,11 @@ services:
       dockerfile: Dockerfile
     container_name: attendance_web
     ports:
-      - "8000:80"
-    volumes:
-      - .:/var/www/html
+      - "80:80"
     environment:
       - DB_HOST=db
       - DB_USER=root
-      - DB_PASS=rootpassword
+      - DB_PASS=${DB_PASS:-rootpassword}
       - DB_NAME=attendance_system
     depends_on:
       db:
@@ -28,12 +26,12 @@ services:
     image: mysql:8.0
     container_name: attendance_db
     ports:
-      - "3307:3306"
+      - "3306:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
       MYSQL_DATABASE: attendance_system
-      MYSQL_USER: attendance_user
-      MYSQL_PASSWORD: attendance_pass
+      MYSQL_USER: ${MYSQL_USER:-attendance_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-attendance_pass}
     volumes:
       - db_data:/var/lib/mysql
       - ./database.sql:/docker-entrypoint-initdb.d/database.sql
@@ -41,9 +39,10 @@ services:
       - attendance_network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
       timeout: 5s
       retries: 10
+      interval: 5s
 
   # PhpMyAdmin (Optional - for database management)
   phpmyadmin:
@@ -54,7 +53,7 @@ services:
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
-      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
     depends_on:
       - db
     networks:
