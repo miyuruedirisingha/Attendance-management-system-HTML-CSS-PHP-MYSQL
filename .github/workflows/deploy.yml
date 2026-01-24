@@ -1,78 +1,50 @@
-name: Deploy to EC2 with Docker
+name: Deploy to EC2 (Docker CI/CD)
 
 on:
   push:
     branches:
       - main
-      - master
-  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Deploy to EC2
-      env:
-        PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
-        HOST: ${{ secrets.EC2_HOST }}
-        USER: ${{ secrets.EC2_USER }}
-      run: |
-        echo "🔑 Setting up SSH..."
-        echo "$PRIVATE_KEY" > private_key.pem
-        chmod 600 private_key.pem
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-        echo "📦 Syncing files to EC2..."
-        rsync -avz --delete \
-          -e "ssh -o StrictHostKeyChecking=no -i private_key.pem" \
-          --exclude '.git' \
-          --exclude '.github' \
-          --exclude '.env' \
-          ./ ${USER}@${HOST}:~/attendance-app/
+      - name: Sync project to EC2
+        run: |
+          rsync -avz --delete \
+            --exclude='.git' \
+            ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/attendance-app
 
-        echo "🚀 Deploying with Docker on EC2..."
-        ssh -o StrictHostKeyChecking=no -i private_key.pem ${USER}@${HOST} << 'ENDSSH'
-          set -e
-          cd ~/attendance-app
+      - name: Deploy on EC2
+        run: |
+          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            cd /home/ubuntu/attendance-app
 
-          echo "📝 Preparing environment..."
-          if [ ! -f .env ]; then
-            cp .env.example .env
-          fi
+            echo "🛑 Stopping and removing old containers..."
+            docker compose down --remove-orphans || true
 
-          echo "⬇️ Stopping old containers..."
-          docker-compose -f docker-compose.prod.yml down
+            echo "🧹 Force removing old DB container if exists..."
+            docker rm -f attendance_db || true
 
-          echo "🏗️ Rebuilding and starting containers..."
-          docker-compose -f docker-compose.prod.yml up -d \
-            --build \
-            --force-recreate \
-            --remove-orphans
+            echo "🧼 Cleaning unused images..."
+            docker image prune -af
 
-          echo "⏳ Waiting for services..."
-          sleep 10
+            echo "🏗️ Rebuilding images (no cache)..."
+            docker compose build --no-cache
 
-          echo "🔍 Container status:"
-          docker-compose -f docker-compose.prod.yml ps
+            echo "🚀 Starting containers..."
+            docker compose up -d
 
-          echo "🧹 Cleaning unused images..."
-          docker image prune -f
-
-          echo "✅ Deployment successful!"
-        ENDSSH
-
-        rm -f private_key.pem
-        echo "🎉 Deployment complete!"
-
-    - name: Deployment notification
-      if: always()
-      run: |
-        if [ "${{ job.status }}" == "success" ]; then
-          echo "✅ Deployment succeeded!"
-        else
-          echo "❌ Deployment failed!"
-        fi
-       
+            echo "✅ Deployment completed!"
+          EOF
