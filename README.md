@@ -1,6 +1,6 @@
 # Attendance Management System
 
-A complete web-based attendance management system built with HTML, CSS, PHP, and MySQL.
+A complete web-based attendance management system built with HTML, CSS, PHP, and MySQL. Fully containerized with Docker for easy deployment on any platform including AWS EC2.
 
 ## Features
 
@@ -11,31 +11,68 @@ A complete web-based attendance management system built with HTML, CSS, PHP, and
 - **Mark Attendance**: Easy-to-use interface for marking daily attendance
 - **Attendance Reports**: View detailed reports and export to CSV
 - **Responsive Design**: Works on desktop and mobile devices
+- **🐳 Docker Support**: One-command deployment with Docker Compose
+- **☁️ Cloud Ready**: Pre-configured for AWS EC2 deployment
 
-## Installation Instructions
+## 🚀 Quick Start with Docker (Recommended)
 
 ### Prerequisites
-- XAMPP (or any PHP 7.4+ and MySQL server)
-- Web browser
+- Docker & Docker Compose installed ([Get Docker](https://docs.docker.com/get-docker/))
 
-### Setup Steps
+### Deployment Steps
+
+```bash
+# 1. Clone the repository
+git clone <your-repo-url>
+cd Attendance-management-system-HTML-CSS-PHP-MYSQL
+
+# 2. Configure environment
+cp .env.example .env
+# Edit .env with your secure passwords
+
+# 3. Deploy
+docker-compose up -d
+```
+
+**Access your application:**
+- 🌐 Web Application: http://localhost
+- 🗄️ PhpMyAdmin: http://localhost:8080
+- 👤 Default Login: `admin` / `admin123`
+
+## 📦 Deployment Options
+
+### Option 1: Docker on Local Machine
+Perfect for development and testing
+```bash
+docker-compose up -d
+```
+
+### Option 2: Docker on AWS EC2 (Production)
+Deploy to AWS EC2 with Docker
+```bash
+# One-time EC2 setup (installs Docker)
+./ec2-setup.sh
+
+# Deploy/redeploy application
+./ec2-deploy.sh
+```
+📚 **Full Guide**: [EC2-DEPLOYMENT-GUIDE.md](EC2-DEPLOYMENT-GUIDE.md)
+
+### Option 3: Traditional XAMPP Setup
+For local development without Docker
+
+**Prerequisites**: XAMPP (PHP 7.4+ and MySQL)
 
 1. **Copy Files**
-   - Copy the entire "Attendance Management System" folder to `C:\xampp\htdocs\`
+   - Copy folder to `C:\xampp\htdocs\`
 
 2. **Create Database**
-   - Start XAMPP Control Panel
-   - Start Apache and MySQL services
-   - Open phpMyAdmin: http://localhost/phpmyadmin
-   - Click "Import" tab
-   - Choose file: `database.sql`
-   - Click "Go" to import
+   - Start Apache and MySQL in XAMPP
+   - Import `database.sql` via phpMyAdmin
 
-3. **Access the System**
-   - Open browser and go to: http://localhost/Attendance%20Management%20System/
-   - Login with default credentials:
-     - Username: `admin`
-     - Password: `admin123`
+3. **Access**
+   - http://localhost/Attendance%20Management%20System/
+   - Login: `admin` / `admin123`
 
 ## File Structure
 
