@@ -47,7 +47,7 @@ Perfect for development and testing
 docker-compose up -d
 ```
 
-### Option 2: Docker on AWS EC2 (Production)
+### Option 2: Docker on AWS EC2 (Manual Deployment)
 Deploy to AWS EC2 with Docker
 ```bash
 # One-time EC2 setup (installs Docker)
@@ -57,6 +57,22 @@ Deploy to AWS EC2 with Docker
 ./ec2-deploy.sh
 ```
 📚 **Full Guide**: [EC2-DEPLOYMENT-GUIDE.md](EC2-DEPLOYMENT-GUIDE.md)
+
+### Option 3: AWS EC2 with CI/CD (Automated)
+Automated deployment with GitHub Actions - **Recommended for Production**
+
+**Setup** (One-time, 10 minutes):
+1. Launch EC2 instance and install Docker
+2. Add 3 GitHub Secrets (EC2_SSH_KEY, EC2_HOST, EC2_USER)
+3. Push code → Automatic deployment! 🚀
+
+📚 **Full CI/CD Guide**: [CI-CD-SETUP.md](CI-CD-SETUP.md)
+
+**Benefits**:
+- ✅ Automatic deployment on every push
+- ✅ No manual SSH needed
+- ✅ Rollback on failure
+- ✅ Deployment history tracking
 
 ### Option 3: Traditional XAMPP Setup
 For local development without Docker
