@@ -10,11 +10,11 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-      
+
     - name: Deploy to EC2
       env:
         PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
@@ -24,73 +24,49 @@ jobs:
         echo "🔑 Setting up SSH..."
         echo "$PRIVATE_KEY" > private_key.pem
         chmod 600 private_key.pem
-        
+
         echo "📦 Syncing files to EC2..."
         rsync -avz --delete \
           -e "ssh -o StrictHostKeyChecking=no -i private_key.pem" \
           --exclude '.git' \
           --exclude '.github' \
           --exclude '.env' \
-          --exclude 'node_modules' \
           ./ ${USER}@${HOST}:~/attendance-app/
-        
+
         echo "🚀 Deploying with Docker on EC2..."
         ssh -o StrictHostKeyChecking=no -i private_key.pem ${USER}@${HOST} << 'ENDSSH'
+          set -e
           cd ~/attendance-app
-          
-          # Create .env if it doesn't exist
+
+          echo "📝 Preparing environment..."
           if [ ! -f .env ]; then
-            echo "📝 Creating .env from example..."
             cp .env.example .env
           fi
-          
-          echo "⬇️ Stopping existing containers..."
-          docker-compose -f docker-compose.prod.yml down || true
-          
-          echo "🧹 Cleaning old images..."
-          docker images | grep attendance | awk '{print $3}' | xargs -r docker rmi -f || true
-          
-          echo "🏗️ Building Docker images..."
-          docker-compose -f docker-compose.prod.yml build --no-cache
-          
-          echo "🚀 Starting containers..."
-          docker-compose -f docker-compose.prod.yml up -d
-          
+
+          echo "⬇️ Stopping old containers..."
+          docker-compose -f docker-compose.prod.yml down
+
+          echo "🏗️ Rebuilding and starting containers..."
+          docker-compose -f docker-compose.prod.yml up -d \
+            --build \
+            --force-recreate \
+            --remove-orphans
+
           echo "⏳ Waiting for services..."
-          sleep 15
-          
-          echo "🔍 Checking container status..."
+          sleep 10
+
+          echo "🔍 Container status:"
           docker-compose -f docker-compose.prod.yml ps
-          
-          # Verify web container
-          if [ "$(docker inspect -f '{{.State.Running}}' attendance_web 2>/dev/null)" == "true" ]; then
-            echo "✅ Web container running"
-          else
-            echo "❌ Web container failed"
-            docker logs attendance_web --tail 50
-            exit 1
-          fi
-          
-          # Verify database container
-          if [ "$(docker inspect -f '{{.State.Running}}' attendance_db 2>/dev/null)" == "true" ]; then
-            echo "✅ Database container running"
-          else
-            echo "❌ Database container failed"
-            docker logs attendance_db --tail 50
-            exit 1
-          fi
-          
-          echo "🧹 Cleaning up..."
+
+          echo "🧹 Cleaning unused images..."
           docker image prune -f
-          
-          echo ""
+
           echo "✅ Deployment successful!"
-          echo "🌐 Access: http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)"
         ENDSSH
-        
+
         rm -f private_key.pem
         echo "🎉 Deployment complete!"
-    
+
     - name: Deployment notification
       if: always()
       run: |
@@ -99,3 +75,4 @@ jobs:
         else
           echo "❌ Deployment failed!"
         fi
+       
