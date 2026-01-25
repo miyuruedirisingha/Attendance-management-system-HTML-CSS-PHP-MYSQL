@@ -37,7 +37,7 @@ jobs:
             
             echo "🔍 Checking current images..."
             docker images | grep attendance || echo "No attendance images found"
-            OLD_WEB_IMAGE=$(docker images attendance-management-system-html-css-php-mysql_web --format "{{.ID}}" | head -1 || echo "none")
+            OLD_WEB_IMAGE=$(docker images attendance-app_web --format "{{.ID}}" | head -1 || echo "none")
             echo "Old web image ID: $OLD_WEB_IMAGE"
 
             echo "🛑 Stopping and removing old containers..."
@@ -53,7 +53,7 @@ jobs:
             docker-compose build --no-cache
             
             echo "🔍 Verifying new images were created..."
-            NEW_WEB_IMAGE=$(docker images attendance-management-system-html-css-php-mysql_web --format "{{.ID}}" | head -1)
+            NEW_WEB_IMAGE=$(docker images attendance-app_web --format "{{.ID}}" | head -1)
             echo "New web image ID: $NEW_WEB_IMAGE"
             
             if [ "$OLD_WEB_IMAGE" = "$NEW_WEB_IMAGE" ] && [ "$OLD_WEB_IMAGE" != "none" ]; then
