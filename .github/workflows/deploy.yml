@@ -61,18 +61,25 @@ jobs:
               exit 1
             fi
 
-            echo "🚀 Starting containers..."
-            docker-compose up -d
+            echo "🚀 Starting containers with force recreate..."
+            docker-compose up -d --force-recreate
 
             echo "⏳ Waiting for containers to be healthy..."
             sleep 10
+            
+            echo "🧹 Clearing Apache cache inside container..."
+            docker exec attendance_web rm -rf /tmp/* || true
 
             echo "🔍 Container status:"
             docker-compose ps
 
             echo "📊 Checking web container logs..."
             docker logs attendance_web --tail=20 || true
+            
+            echo "🔄 Restarting Apache to clear PHP opcache..."
+            docker exec attendance_web apachectl graceful || true
 
             echo "✅ Deployment completed successfully!"
             echo "New image: $NEW_WEB_IMAGE"
+            echo "🌐 Clear browser cache (Ctrl+F5) to see CSS changes"
           EOF
