@@ -29,22 +29,50 @@ jobs:
       - name: Deploy on EC2
         run: |
           ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            set -e  # Exit on any error
             cd /home/ubuntu/attendance-app
+
+            echo "📋 Current directory: $(pwd)"
+            echo "📂 Files present: $(ls -la | head -10)"
+            
+            echo "🔍 Checking current images..."
+            docker images | grep attendance || echo "No attendance images found"
+            OLD_WEB_IMAGE=$(docker images attendance-management-system-html-css-php-mysql-web --format "{{.ID}}" | head -1 || echo "none")
+            echo "Old web image ID: $OLD_WEB_IMAGE"
 
             echo "🛑 Stopping and removing old containers..."
             docker compose down --remove-orphans || true
 
-            echo "🧹 Force removing old DB container if exists..."
-            docker rm -f attendance_db || true
+            echo "🧹 Force removing old containers if they exist..."
+            docker rm -f attendance_db attendance_web attendance_phpmyadmin || true
 
-            echo "🧼 Cleaning unused images..."
-            docker image prune -af
+            echo "🧼 Pruning unused images..."
+            docker image prune -af --filter "label!=keep"
 
-            echo "🏗️ Rebuilding images (no cache)..."
-            docker compose build --no-cache
+            echo "🏗️ Rebuilding images with no cache..."
+            docker compose build --no-cache --pull
+            
+            echo "🔍 Verifying new images were created..."
+            NEW_WEB_IMAGE=$(docker images attendance-management-system-html-css-php-mysql-web --format "{{.ID}}" | head -1)
+            echo "New web image ID: $NEW_WEB_IMAGE"
+            
+            if [ "$OLD_WEB_IMAGE" = "$NEW_WEB_IMAGE" ] && [ "$OLD_WEB_IMAGE" != "none" ]; then
+              echo "⚠️  WARNING: Image ID didn't change! Rebuild may have failed!"
+              exit 1
+            fi
 
             echo "🚀 Starting containers..."
             docker compose up -d
 
-            echo "✅ Deployment completed!"
+            echo "⏳ Waiting for containers to be healthy..."
+            sleep 10
+
+            echo "🔍 Container status:"
+            docker compose ps
+
+            echo "📊 Checking web container logs..."
+            docker logs attendance_web --tail=20 || true
+
+            echo "✅ Deployment completed successfully!"
+            echo "New image: $NEW_WEB_IMAGE"
           EOF
