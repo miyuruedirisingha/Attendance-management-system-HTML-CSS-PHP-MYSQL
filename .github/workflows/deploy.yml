@@ -80,8 +80,12 @@ jobs:
             echo "⏳ Waiting for containers to be healthy..."
             sleep 10
             
-            echo "🧹 Clearing Apache cache inside container..."
-            docker exec attendance_web rm -rf /tmp/* || true
+            echo "🔍 Verify files inside new container..."
+            docker exec attendance_web cat /var/www/html/css/style.css | head -20
+            
+            echo "🧹 Clear all caches in container..."
+            docker exec attendance_web bash -c "rm -rf /tmp/* /var/cache/apache2/* || true"
+            docker exec attendance_web apachectl -k graceful || true
 
             echo "🔍 Container status:"
             docker-compose ps
