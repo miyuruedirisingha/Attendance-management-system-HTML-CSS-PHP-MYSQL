@@ -2,6 +2,11 @@
 require_once 'config.php';
 requireLogin();
 
+// Version check - display build time
+if (file_exists('.build-info.php')) {
+    include '.build-info.php';
+}
+
 // Get statistics
 $total_students = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as count FROM students WHERE status='active'"))['count'];
 $total_classes = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as count FROM classes"))['count'];

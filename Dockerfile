@@ -16,6 +16,9 @@ WORKDIR /var/www/html
 # Copy application files to container
 COPY . /var/www/html/
 
+# Add build timestamp to verify deployment
+RUN echo "<?php /* Build: $(date -u +%Y%m%d-%H%M%S) */ ?>" > /var/www/html/.build-info.php
+
 # Set proper permissions
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html

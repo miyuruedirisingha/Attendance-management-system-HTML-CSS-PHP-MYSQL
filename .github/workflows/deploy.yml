@@ -81,7 +81,12 @@ jobs:
             sleep 10
             
             echo "🔍 Verify files inside new container..."
+            echo "=== CSS file (first 20 lines) ==="
             docker exec attendance_web cat /var/www/html/css/style.css | head -20
+            echo "=== Build info ==="
+            docker exec attendance_web cat /var/www/html/.build-info.php || echo "Build info not found"
+            echo "=== Git commit in container ==="
+            docker exec attendance_web bash -c "cd /var/www/html && git log --oneline -1" || echo "Git not available in container"
             
             echo "🧹 Clear all caches in container..."
             docker exec attendance_web bash -c "rm -rf /tmp/* /var/cache/apache2/* || true"
