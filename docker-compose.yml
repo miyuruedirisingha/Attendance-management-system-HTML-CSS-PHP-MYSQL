@@ -20,8 +20,8 @@ services:
     networks:
       - attendance_network
     restart: unless-stopped
-    volumes:
-      - .:/var/www/html  # Mount for development (live updates)
+    # volumes:
+    #   - .:/var/www/html  # Mount for development (live updates) - DISABLED for production
 
   # MySQL Database
   db:
