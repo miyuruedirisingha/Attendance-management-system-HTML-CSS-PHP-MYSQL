@@ -41,10 +41,14 @@ jobs:
             echo "Old web image ID: $OLD_WEB_IMAGE"
 
             echo "🛑 Stopping and removing old containers..."
-            docker-compose down --remove-orphans || true
+            docker-compose down --remove-orphans --volumes || true
 
             echo "🧹 Force removing old containers if they exist..."
             docker rm -f attendance_db attendance_web attendance_phpmyadmin || true
+
+            echo "🗑️ Removing old images..."
+            docker rmi -f attendance-app_web || true
+            docker rmi -f $(docker images -q attendance-app_web) || true
 
             echo "🧼 Pruning unused images..."
             docker image prune -af
@@ -56,13 +60,18 @@ jobs:
             NEW_WEB_IMAGE=$(docker images attendance-app_web --format "{{.ID}}" | head -1)
             echo "New web image ID: $NEW_WEB_IMAGE"
             
+            if [ -z "$NEW_WEB_IMAGE" ]; then
+              echo "❌ ERROR: New image was not created!"
+              exit 1
+            fi
+            
             if [ "$OLD_WEB_IMAGE" = "$NEW_WEB_IMAGE" ] && [ "$OLD_WEB_IMAGE" != "none" ]; then
               echo "⚠️  WARNING: Image ID didn't change! Rebuild may have failed!"
               exit 1
             fi
 
             echo "🚀 Starting containers with force recreate..."
-            docker-compose up -d --force-recreate
+            docker-compose up -d --force-recreate --remove-orphans
 
             echo "⏳ Waiting for containers to be healthy..."
             sleep 10
@@ -72,6 +81,11 @@ jobs:
 
             echo "🔍 Container status:"
             docker-compose ps
+            
+            echo "🔍 Verify running containers are using new image..."
+            RUNNING_IMAGE=$(docker inspect attendance_web --format='{{.Image}}' | cut -c8-19)
+            echo "Running container image: $RUNNING_IMAGE"
+            echo "Built image: $NEW_WEB_IMAGE"
 
             echo "📊 Checking web container logs..."
             docker logs attendance_web --tail=20 || true
