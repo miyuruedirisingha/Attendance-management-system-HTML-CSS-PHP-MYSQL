@@ -42,19 +42,23 @@ jobs:
 
             echo "🛑 Stopping and removing old containers..."
             docker-compose down --remove-orphans --volumes || true
-
-            echo "🧹 Force removing old containers if they exist..."
+            
+            echo "🧹 Force stop and remove ALL attendance containers..."
+            docker stop attendance_db attendance_web attendance_phpmyadmin || true
             docker rm -f attendance_db attendance_web attendance_phpmyadmin || true
+            
+            echo "🗑️ Removing ALL old attendance images..."
+            docker rmi -f $(docker images | grep attendance | awk '{print $3}') || true
+            docker image prune -af || true
 
-            echo "🗑️ Removing old images..."
-            docker rmi -f attendance-app_web || true
-            docker rmi -f $(docker images -q attendance-app_web) || true
+            echo "🧹 Clean Docker system..."
+            docker system prune -f || true
 
             echo "🧼 Pruning unused images..."
             docker image prune -af
 
             echo "🏗️ Rebuilding images with no cache..."
-            docker-compose build --no-cache
+            docker-compose build --no-cache --pull
             
             echo "🔍 Verifying new images were created..."
             NEW_WEB_IMAGE=$(docker images attendance-app_web --format "{{.ID}}" | head -1)
