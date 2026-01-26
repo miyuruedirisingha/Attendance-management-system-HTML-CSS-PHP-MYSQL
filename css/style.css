@@ -1,5 +1,5 @@
 /* Reset and Base Styles */
-/* VERSION: 2026-01-26-v1 - Black theme with deployment tracking */
+/* VERSION: 2026-01-26-v2 - Clean white theme */
 * {
     margin: 0;
     padding: 0;
@@ -7,8 +7,8 @@
 }
  body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #000000;
-    color: #e0e0e0;
+    background: #ffffff;
+    color: #333333;
     line-height: 1.6;
 }
 
@@ -18,7 +18,7 @@
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: #000000;
+    background: #f5f5f5;
 }
 
 .login-container {
@@ -28,11 +28,11 @@
 }
 
 .login-box {
-    background: #0a0a0a;
+    background: #ffffff;
     border-radius: 10px;
     padding: 40px;
-    box-shadow: 0 10px 40px rgba(255, 255, 255, 0.1);
-    border: 1px solid #333;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
 }
 
 .login-box h1 {
@@ -45,7 +45,7 @@
 .login-box h2 {
     text-align: center;
     margin-bottom: 30px;
-    color: #a0a0a0;
+    color: #666666;
     font-size: 20px;
     font-weight: normal;
 }
@@ -61,10 +61,10 @@
 
 /* Navigation Bar */
 .navbar {
-    background: #000000;
-    color: white;
-    box-shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
-    border-bottom: 1px solid #333;
+    background: #ffffff;
+    color: #333333;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid #e0e0e0;
 }
 
 .nav-container {
@@ -77,7 +77,7 @@
 }
 
 .nav-brand a {
-    color: white;
+    color: #0d47a1;
     text-decoration: none;
     font-size: 24px;
     font-weight: bold;
@@ -90,7 +90,7 @@
 }
 
 .nav-menu a {
-    color: white;
+    color: #333333;
     text-decoration: none;
     padding: 8px 16px;
     border-radius: 5px;
@@ -98,7 +98,8 @@
 }
 
 .nav-menu a:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(13, 71, 161, 0.1);
+    color: #0d47a1;
 }
 
 .nav-user {
@@ -107,18 +108,18 @@
     gap: 15px;
 }
 
-.nav-user span {
-    color: white;
+.nav-user s#333333;
 }
 
 .nav-user .btn {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: #f5f5f5;
+    color: #333333;
+    border: 1px solid #e0e0e0;
 }
 
 .nav-user .btn:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: #e0e0e0;
+    border-color: #cccccc5, 255, 255, 0.3);
     border-color: white;
 }
 
@@ -130,12 +131,12 @@
 }
 
 /* Cards */
-.card {
-    background: #0a0a0a;
+.card {ffffff;
     border-radius: 8px;
     padding: 25px;
     margin-bottom: 25px;
-    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0rgba(255, 255, 255, 0.05);
     border: 1px solid #222;
 }
 
@@ -164,12 +165,11 @@
     margin-bottom: 30px;
 }
 
-.stat-card {
-    background: #0a0a0a;
+.stat-card {ffffff;
     border-radius: 8px;
     padding: 25px;
-    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.05);
-    border: 1px solid #222;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
     display: flex;
     align-items: center;
     gap: 20px;
@@ -178,6 +178,7 @@
 
 .stat-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15
     box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
 }
 
@@ -192,7 +193,7 @@
 }
 
 .stat-info p {
-    color: #a0a0a0;
+    color: #666666;
     font-size: 14px;
 }
 
@@ -205,7 +206,7 @@
     display: block;
     margin-bottom: 8px;
     font-weight: 500;
-    color: #c0c0c0;
+    color: #333333;
 }
 
 .form-group input,
@@ -213,11 +214,11 @@
 .form-group textarea {
     width: 100%;
     padding: 12px;
-    border: 1px solid #333;
+    border: 1px solid #cccccc;
     border-radius: 5px;
     font-size: 14px;
-    background: #000000;
-    color: #e0e0e0;
+    background: #ffffff;
+    color: #333333;
     transition: border-color 0.3s;
 }
 
